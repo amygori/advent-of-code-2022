@@ -1,14 +1,21 @@
 import sys
 from pathlib import Path
 from collections import deque
-
+import re
 
 def rearrange_crates(crates, moves):
     stacks = parse_stacks(crates)
-    print(stacks)
-    # print("🏗️  MOVES ")
-    # print(moves)
-
+    moves = moves.split("\n")
+    for move in moves:
+      num_crates = int(re.search(r"(^move\s)(\w*)", move).group(2))
+      from_stack = int(re.search(r"(from\s)(\w)", move).group(2))
+      to_stack = int(re.search(r"(to\s)(\w)", move).group(2))
+      for num in range(1, num_crates+1):
+            stacks[to_stack].append(stacks[from_stack].pop())
+    message = ""
+    for stack in list(stacks.values()):
+      message += stack[-1]
+    print(message)
 
 def parse_stacks(crates_string):
     # create a list of strings for each line in crate data
@@ -27,7 +34,7 @@ def parse_stacks(crates_string):
         crate_row = (
             crate_row.replace("[", "")  # remove brackets
             .replace("]", "")
-            .replace("    ", "X") # insert "X" as placeholder for empty spot, look for 4 spaces
+            .replace("    ", "X") # insert "X" as placeholder for empty spot
             .replace(" ", "") # remove remaining whitepace
         )
         # if the length of the row is less than the total len of the keys we put in the dict,
@@ -37,7 +44,7 @@ def parse_stacks(crates_string):
         crate_grid.appendleft(crate_row)
     # loop through crates and put them into the lists in the dictionary
     for crate_row in crate_grid:
-        for index, crate in enumerate(crate_row): # 'ZMP' - z goes on the bottom of stack 1, m on the bottom of stack 2, and p on the
+        for index, crate in enumerate(crate_row):
             if crate == "X":
                 continue
             stacks[index + 1].append(crate)
